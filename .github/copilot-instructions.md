@@ -1,0 +1,16 @@
+- [x] Verify that the copilot-instructions.md file in the .github directory is created.
+- [x] Clarify Project Requirements
+- [x] Scaffold the Project
+- [x] Customize the Project
+- [x] Install Required Extensions
+- [x] Compile the Project
+- [x] Create and Run Task
+- [x] Launch the Project
+- [x] Ensure Documentation is Complete
+
+- Use pnpm for package management.
+- Build a vanilla TypeScript Tampermonkey userscript with Vite and vite-plugin-monkey.
+- Keep site parsing, domain models, download backends, settings, and UI in separate modules.
+- Preserve the confirmed Pixiv Toolkit-derived defaults in src/settings.ts.
+- Run typecheck, lint, tests, and build before completion.
+- Never store authentication cookies, paid FANBOX content, or aria2 secrets in the repository or logs.

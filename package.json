@@ -1,0 +1,25 @@
+{
+  "name": "pixiv-downloader-catnook",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.1.1",
+    "eslint": "10.7.0",
+    "globals": "17.7.0",
+    "jsdom": "29.1.1",
+    "typescript": "6.0.2",
+    "typescript-eslint": "8.64.0",
+    "vite": "8.1.5",
+    "vite-plugin-monkey": "8.1.0",
+    "vitest": "4.1.10"
+  }
+}
