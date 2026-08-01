@@ -31,12 +31,23 @@ describe('AppUi', () => {
     expect(host?.shadowRoot?.querySelector('.title')?.textContent).toBe('Title');
     expect(host?.shadowRoot?.querySelector('.meta')?.textContent).toBe('Artist · 1 个文件');
     expect(host?.shadowRoot?.querySelector<HTMLButtonElement>('.download')?.disabled).toBe(false);
+    const panel = host?.shadowRoot?.querySelector<HTMLElement>('.panel');
+    const panelToggle = host?.shadowRoot?.querySelector<HTMLButtonElement>('.panel-toggle');
+    expect(panel?.classList.contains('collapsed')).toBe(true);
+    expect(panelToggle?.hidden).toBe(false);
     const imageSection = host?.shadowRoot?.querySelector<HTMLElement>('.image-section');
     const imageToggle = host?.shadowRoot?.querySelector<HTMLButtonElement>('.image-picker-toggle');
     expect(imageSection?.hidden).toBe(true);
     expect(imageToggle?.hidden).toBe(false);
+    expect(imageToggle?.querySelector('.picker-summary')?.textContent).toBe('1/1');
+    expect(host?.shadowRoot?.querySelectorAll('.image-option')).toHaveLength(0);
+    expect(host?.shadowRoot?.querySelectorAll('.image-option img')).toHaveLength(0);
+    panelToggle?.click();
+    expect(panel?.classList.contains('collapsed')).toBe(false);
     imageToggle?.click();
     expect(imageSection?.hidden).toBe(false);
+    expect(host?.shadowRoot?.querySelectorAll('.image-option')).toHaveLength(1);
+    expect(host?.shadowRoot?.querySelectorAll('.image-option img')).toHaveLength(1);
     imageToggle?.click();
     expect(imageSection?.hidden).toBe(true);
     const namingTab = host?.shadowRoot?.querySelector<HTMLButtonElement>('[data-tab="naming"]');
@@ -89,7 +100,9 @@ describe('AppUi', () => {
     ui.mount();
     ui.showManifest(manifest);
     const shadow = document.querySelector<HTMLDivElement>('#pixiv-downloader-catnook')?.shadowRoot;
+    shadow?.querySelector<HTMLButtonElement>('.panel-toggle')?.click();
     const toggle = shadow?.querySelector<HTMLButtonElement>('.image-picker-toggle');
+    expect(shadow?.querySelectorAll('.image-option')).toHaveLength(0);
     toggle?.click();
     const secondImage = shadow?.querySelectorAll<HTMLInputElement>('.image-option input')[1];
     if (secondImage) {

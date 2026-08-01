@@ -48,11 +48,11 @@ button:hover{border-color:#cbd0d6;background:var(--surface-subtle)}
 button:active{transform:translateY(1px)}
 button:disabled{cursor:not-allowed;opacity:.48;transform:none}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.panel{position:fixed;right:24px;bottom:24px;z-index:2147483646;width:368px;max-height:calc(100vh - 48px);display:flex;flex-direction:column;border:1px solid rgba(25,31,38,.12);border-radius:8px;background:var(--surface);box-shadow:0 18px 50px rgba(31,39,49,.2),0 3px 12px rgba(31,39,49,.08);overflow:hidden;animation:panel-in .2s ease-out}
+.panel{position:fixed;right:24px;bottom:24px;z-index:2147483646;width:368px;max-height:calc(100vh - 48px);display:flex;flex-direction:column;border:1px solid rgba(25,31,38,.12);border-radius:8px;background:var(--surface);box-shadow:0 18px 50px rgba(31,39,49,.2),0 3px 12px rgba(31,39,49,.08);overflow:hidden;animation:panel-in .2s ease-out}.panel-toggle{display:none}.panel.collapsed{right:80px;width:48px;height:48px;max-height:none;border-color:var(--accent);background:var(--accent);box-shadow:0 12px 30px rgba(0,150,250,.28);overflow:visible}.panel.collapsed .panel-content{display:none}.panel.collapsed .panel-toggle{display:grid;place-items:center;width:48px;height:48px;min-height:48px;padding:0;border:0;border-radius:7px;background:transparent;color:#fff;font-size:22px;font-weight:700}.panel.collapsed .panel-toggle:hover{background:var(--accent-strong)}
 .header{display:flex;align-items:center;gap:10px;min-height:58px;padding:10px 12px 10px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
 .brand-mark{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:6px;background:var(--ink);color:#fff;font-size:17px;font-weight:700}
 .brand{min-width:0;flex:1}.title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:700;color:var(--ink)}.meta{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:11px;font-weight:400;margin-top:3px}
-.icon{display:grid;place-items:center;width:36px;padding:0;font-size:16px}.settings-button{border-color:transparent;background:transparent;color:#5d636a}.settings-button:hover{border-color:var(--line);background:#fff;color:var(--ink)}
+.icon{display:grid;place-items:center;width:36px;padding:0;font-size:16px}.settings-button,.minimize-button{border-color:transparent;background:transparent;color:#5d636a}.settings-button:hover,.minimize-button:hover{border-color:var(--line);background:#fff;color:var(--ink)}
 .body{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:12px 14px 14px;overflow:auto;overscroll-behavior:contain}
 .action-row{display:grid;grid-template-columns:100px minmax(0,1fr) 88px;align-items:center;gap:8px}
 .backend-field{display:block;min-width:0}.backend-field span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.backend-field select{width:100%;height:40px;border:1px solid #cfd4da;border-radius:6px;background-color:#fff;color:var(--ink);padding-left:10px}
@@ -84,6 +84,7 @@ export class AppUi {
   private readonly shadow = this.host.attachShadow({ mode: 'open' });
   private settings: AppSettings;
   private manifest?: DownloadManifest;
+  private imageResources: RemoteResource[] = [];
   private readonly selectedImageIds = new Set<string>();
   private downloading = false;
 
@@ -91,10 +92,13 @@ export class AppUi {
     this.settings = structuredClone(settings);
     this.host.id = 'pixiv-downloader-catnook';
     this.shadow.innerHTML = `<style>${styles}</style>
-      <section class="panel" hidden aria-label="Pixiv Downloader CatNook 下载面板">
+      <section class="panel collapsed" hidden aria-label="Pixiv Downloader CatNook 下载面板">
+        <button class="panel-toggle" type="button" title="打开下载面板" aria-label="打开下载面板" aria-expanded="false"><span aria-hidden="true">&#10515;</span></button>
+        <div class="panel-content">
         <div class="header">
-          <div class="brand-mark" aria-hidden="true">&#8595;</div>
+          <div class="brand-mark" aria-hidden="true">&#10515;</div>
           <div class="brand"><div class="title">Pixiv Downloader CatNook</div><span class="meta">等待支持的页面</span></div>
+          <button class="icon minimize-button" type="button" title="收起下载面板" aria-label="收起下载面板"><span aria-hidden="true">&#8722;</span></button>
           <button class="icon settings-button" type="button" title="设置" aria-label="打开设置"><span aria-hidden="true">&#9881;</span></button>
         </div>
         <div class="body">
@@ -111,6 +115,7 @@ export class AppUi {
           </div>
         </div>
         <div class="status" data-tone="neutral" role="status" aria-live="polite"></div>
+        </div>
       </section>
       <dialog lang="zh-CN">
         <div class="dialog-head"><div class="dialog-heading"><span class="dialog-kicker">CATNOOK</span><h2>下载设置</h2></div><button class="icon close" type="button" aria-label="关闭设置">&times;</button></div>
@@ -161,6 +166,7 @@ export class AppUi {
 
   showLoading(): void {
     this.panel.hidden = false;
+    this.setPanelExpanded(false);
     this.manifest = undefined;
     this.clearImageSelection();
     this.updateDownloadButton();
@@ -222,6 +228,8 @@ export class AppUi {
   }
 
   private bindEvents(): void {
+    this.panelToggle.addEventListener('click', () => this.setPanelExpanded(true));
+    this.minimizeButton.addEventListener('click', () => this.setPanelExpanded(false));
     this.settingsButton.addEventListener('click', () => this.openSettings());
     this.closeButton.addEventListener('click', () => this.dialog.close());
     for (const tab of this.tabs) {
@@ -230,6 +238,9 @@ export class AppUi {
     this.downloadButton.addEventListener('click', () => void this.callbacks.onDownload(this.selectedResources));
     this.imagePickerToggle.addEventListener('click', () => {
       const expanded = this.imageSection.hidden;
+      if (expanded) {
+        this.renderImageOptions();
+      }
       this.imageSection.hidden = !expanded;
       this.imagePicker.hidden = !expanded;
       this.imagePickerToggle.setAttribute('aria-expanded', String(expanded));
@@ -272,6 +283,7 @@ export class AppUi {
   }
 
   private renderImageSelection(resources: RemoteResource[]): void {
+    this.imageResources = resources;
     this.selectedImageIds.clear();
     this.imageGrid.replaceChildren();
     this.imagePicker.hidden = true;
@@ -281,13 +293,24 @@ export class AppUi {
 
     for (const resource of resources) {
       this.selectedImageIds.add(resource.id);
+    }
+    this.updateSelectionState();
+  }
+
+  private renderImageOptions(): void {
+    if (this.imageGrid.childElementCount > 0) {
+      return;
+    }
+
+    for (const resource of this.imageResources) {
       const option = document.createElement('label');
       option.className = 'image-option';
       option.title = resource.relativePath;
 
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.checked = true;
+      checkbox.checked = this.selectedImageIds.has(resource.id);
+      checkbox.disabled = this.downloading;
       checkbox.dataset.resourceId = resource.id;
       checkbox.setAttribute('aria-label', `选择 ${resource.relativePath}`);
       checkbox.addEventListener('change', () => {
@@ -305,10 +328,10 @@ export class AppUi {
       option.append(checkbox, preview, filename);
       this.imageGrid.append(option);
     }
-    this.updateSelectionState();
   }
 
   private clearImageSelection(): void {
+    this.imageResources = [];
     this.selectedImageIds.clear();
     this.imageGrid.replaceChildren();
     this.imagePicker.hidden = true;
@@ -330,7 +353,7 @@ export class AppUi {
   }
 
   private updateSelectionState(): void {
-    const total = this.imageCheckboxes.length;
+    const total = this.imageResources.length;
     const selected = this.selectedImageIds.size;
     this.selectAllCheckbox.checked = total > 0 && selected === total;
     this.selectAllCheckbox.indeterminate = selected > 0 && selected < total;
@@ -418,6 +441,11 @@ export class AppUi {
     this.status.dataset.tone = tone;
   }
 
+  private setPanelExpanded(expanded: boolean): void {
+    this.panel.classList.toggle('collapsed', !expanded);
+    this.panelToggle.setAttribute('aria-expanded', String(expanded));
+  }
+
   private activateTab(name: string): void {
     for (const tab of this.tabs) {
       const active = tab.dataset.tab === name;
@@ -441,6 +469,8 @@ export class AppUi {
   private get title(): HTMLElement { return this.query('.title'); }
   private get meta(): HTMLElement { return this.query('.meta'); }
   private get status(): HTMLElement { return this.query('.status'); }
+  private get panelToggle(): HTMLButtonElement { return this.query('.panel-toggle'); }
+  private get minimizeButton(): HTMLButtonElement { return this.query('.minimize-button'); }
   private get downloadButton(): HTMLButtonElement { return this.query('.download'); }
   private get downloadLabel(): HTMLElement { return this.query('.download-label'); }
   private get settingsButton(): HTMLButtonElement { return this.query('.settings-button'); }

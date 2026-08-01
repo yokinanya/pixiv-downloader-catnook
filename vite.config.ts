@@ -8,7 +8,7 @@ export default defineConfig({
       userscript: {
         name: 'Pixiv Downloader CatNook',
         namespace: 'https://github.com/yokinanya/pixiv-downloader-catnook',
-        version: '0.1.0',
+        version: '0.1.1',
         description: 'Download Pixiv artworks and FANBOX posts with browser or aria2.',
         author: 'yokinanya',
         match: [
